@@ -1,5 +1,5 @@
 // ./src/App.tsx
-
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import uploadFileToBlob, { isStorageConfigured, getBlobsInContainer } from './azure-storage-blob';
 import DisplayImagesFromContainer from './ContainerImages';
@@ -25,6 +25,20 @@ const App = () => {
     })
   }, [fileUploaded]);
 
+// Function to add a new message to the queue
+  const addMessageToQueue = async (message) => {
+      try {
+          // Make an HTTP POST request to the Azure Functions endpoint
+          const response = await axios.post('https://zhaohc.azurewebsites.net/api/HttpTrigger1?code=pSDhbJSqgIFBeZ8cyoNJBptFCHoIPhUn-SXk-fDvMXVaAzFuf-KnNw==', { message });
+
+          // Handle success
+          console.log('Message added to queue:', response.data);
+      } catch (error) {
+          // Handle error
+          console.error('Failed to add message to queue:', error);
+      }
+  };
+
   const onFileChange = (event) => {
     // capture file into state
     setFileSelected(event.target.files[0]);
@@ -39,6 +53,7 @@ const App = () => {
     // *** UPLOAD TO AZURE STORAGE ***
     await uploadFileToBlob(fileSelected);
 
+    await addMessageToQueue("hello");
     // reset state/form
     setFileSelected(null);
     setFileUploaded(fileSelected.name);
